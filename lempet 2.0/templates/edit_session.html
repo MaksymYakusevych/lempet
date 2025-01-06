@@ -6,6 +6,21 @@
 <h1>{% if session and session.id %}Редагувати сесію{% else %}Додати нову сесію{% endif %}</h1>
 
 <form method="POST">
+    {% if session and session.id %}
+        <input type="hidden" name="session_id" value="{{ session.id }}">
+    {% endif %}
+    
+    <div class="mb-3">
+        <label for="user_id" class="form-label">Виберіть користувача:</label>
+        <select id="user_id" name="user_id" class="form-control" {% if session %}disabled{% endif %}>
+            {% for user in users %}
+                <option value="{{ user.id }}" {% if session and session.user_id == user.id %}selected{% endif %}>
+                    {{ user.username }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+
     <div class="mb-3">
         <label for="start_time" class="form-label">Початок:</label>
         <input type="datetime-local" id="start_time" name="start_time" class="form-control"

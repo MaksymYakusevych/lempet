@@ -124,6 +124,31 @@ def users():
     users = User.query.all()
     return render_template('users.html', users=users)
 
+@app.route('/edit_session', methods=['GET', 'POST'])
+@admin_required
+def edit_session():
+    if request.method == 'POST':
+        session_id = request.form.get('session_id')
+        new_start_time = request.form.get('start_time')
+        new_end_time = request.form.get('end_time')
+
+        session_to_edit = WorkSession.query.get(session_id)
+
+        if session_to_edit:
+            if new_start_time:
+                session_to_edit.start_time = datetime.strptime(new_start_time, '%Y-%m-%dT%H:%M')
+            if new_end_time:
+                session_to_edit.end_time = datetime.strptime(new_end_time, '%Y-%m-%dT%H:%M')
+            db.session.commit()
+            flash('Сесію успішно відредаговано!', 'success')
+        else:
+            flash('Сесію не знайдено!', 'error')
+
+        return redirect(url_for('users'))
+
+    return render_template('edit_session.html')
+
+
 @app.route('/user/<int:user_id>/sessions', methods=['GET', 'POST'])
 def user_sessions(user_id):
     if 'user_id' not in session:
