@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Реєстрація{% endblock %}
+
+{% block content %}
+<h1 class="text-center">Реєстрація</h1>
+<form class="w-50 mx-auto" method="POST" action="/signup">
+    <div class="mb-3">
+        <label for="email" class="form-label">Електронна пошта</label>
+        <input type="email" class="form-control" id="email" name="email" placeholder="Введіть вашу електронну пошту" required>
+    </div>
+    <div class="mb-3">
+        <label for="username" class="form-label">Ім'я користувача</label>
+        <input type="text" class="form-control" id="username" name="username" placeholder="Введіть ім'я користувача" required>
+    </div>
+    <div class="mb-3">
+        <label for="password" class="form-label">Пароль</label>
+        <input type="password" class="form-control" id="password" name="password" placeholder="Введіть пароль" required>
+    </div>
+    <div class="mb-3">
+        <label for="confirm_password" class="form-label">Підтвердіть пароль</label>
+        <input type="password" class="form-control" id="confirm_password" name="confirm_password" placeholder="Повторно введіть пароль" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Зареєструватися</button>
+</form>
+
+<script>
+    // Перевірка паролів на стороні клієнта
+    const form = document.querySelector('form');
+    form.addEventListener('submit', (event) => {
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirm_password').value;
+        if (password !== confirmPassword) {
+            event.preventDefault();
+            alert('Паролі не співпадають!');
+        }
+    });
+</script>
+{% endblock %}

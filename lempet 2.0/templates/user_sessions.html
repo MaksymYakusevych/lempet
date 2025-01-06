@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Сесії користувача {{ user.username }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1>Сесії користувача {{ user.username }}</h1>
+
+    <!-- Форма для фільтрації -->
+    <form method="POST" class="mb-4">
+        <div class="row g-3 align-items-center">
+            <div class="col-auto">
+                <label for="filter_date" class="form-label">Виберіть дату:</label>
+                <input type="date" id="filter_date" name="filter_date" class="form-control" required>
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-primary">Фільтрувати</button>
+            </div>
+        </div>
+    </form>
+
+    <!-- Виведення сесій -->
+    {% if sessions %}
+        <ul class="list-group">
+            {% for session in sessions %}
+            <li class="list-group-item">
+                Початок: {{ session.start_time.strftime('%Y-%m-%d %H:%M:%S') if session.start_time else "Не вказано" }}<br>
+                Кінець: {{ session.end_time.strftime('%Y-%m-%d %H:%M:%S') if session.end_time else "Активна сесія" }}
+            </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p class="text-muted">Немає сесій для вибраної дати.</p>
+    {% endif %}
+
+    <a href="{{ url_for('users') }}" class="btn btn-secondary mt-3">Назад до списку користувачів</a>
+</div>
+{% endblock %}

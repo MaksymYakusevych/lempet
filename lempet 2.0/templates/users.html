@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Список користувачів{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1>Список користувачів</h1>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Ім'я користувача</th>
+                <th>Електронна пошта</th>
+                <th>Дії</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td>{{ user.username }}</td>
+                <td>{{ user.email }}</td>
+                <td>
+                    <a href="{{ url_for('user_sessions', user_id=user.id) }}" class="btn btn-primary btn-sm">Переглянути сесії</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block title %}Робоча сторінка{% endblock %}
+
+{% block content %}
+<div class="container text-center mt-5">
+    <h1>Робоча сторінка</h1>
+    <p>Вітаємо, {{ session['username'] }}! Оберіть дію:</p>
+
+    <form method="POST" action="/work">
+        <button type="submit" name="action" value="start" class="btn btn-success btn-lg m-3">На Роботі</button>
+        <button type="submit" name="action" value="stop" class="btn btn-danger btn-lg m-3">Закінчив працювати</button>
+    </form>
+</div>
+{% endblock %}
