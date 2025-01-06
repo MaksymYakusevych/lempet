@@ -148,7 +148,6 @@ def edit_session():
 
     return render_template('edit_session.html')
 
-
 @app.route('/user/<int:user_id>/sessions', methods=['GET', 'POST'])
 def user_sessions(user_id):
     if 'user_id' not in session:
