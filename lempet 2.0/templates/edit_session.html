@@ -3,7 +3,7 @@
 {% block title %}Редагування сесії{% endblock %}
 
 {% block content %}
-<h1>{{ session.id ? "Редагувати сесію" : "Додати нову сесію" }}</h1>
+<h1>{% if session and session.id %}Редагувати сесію{% else %}Додати нову сесію{% endif %}</h1>
 
 <form method="POST">
     <div class="mb-3">

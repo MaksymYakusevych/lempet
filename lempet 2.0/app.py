@@ -155,6 +155,9 @@ def logout():
     flash('Ви успішно вийшли із системи.', 'success')
     return redirect(url_for('home'))
 
+
+
+
 @app.route('/add_admin_once')
 def add_admin_once():
     existing_admin = User.query.filter_by(role='admin').first()
@@ -170,6 +173,9 @@ def add_admin_once():
     db.session.add(admin)
     db.session.commit()
     return "Адміністратор успішно доданий!"
+
+
+
 
 # Ініціалізація бази даних
 with app.app_context():
