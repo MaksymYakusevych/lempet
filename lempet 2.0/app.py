@@ -13,6 +13,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
+
 # Модель користувача
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -87,6 +88,32 @@ def login():
 
     return render_template('login.html')
 
+@app.route('/user/<int:user_id>/sessions/edit/<int:session_id>', methods=['GET', 'POST'])
+@admin_required
+def edit_user_session(user_id, session_id):
+    user = User.query.get_or_404(user_id)
+    session_to_edit = WorkSession.query.get_or_404(session_id)
+    
+    if request.method == 'POST':
+        new_start_time = request.form.get('start_time')
+        new_end_time = request.form.get('end_time')
+
+        if new_start_time:
+            session_to_edit.start_time = datetime.strptime(new_start_time, '%Y-%m-%dT%H:%M')
+        if new_end_time:
+            session_to_edit.end_time = datetime.strptime(new_end_time, '%Y-%m-%dT%H:%M')
+
+        db.session.commit()
+        flash('Сесію успішно відредаговано!', 'success')
+        return redirect(url_for('user_sessions', user_id=user_id))
+    
+    return render_template(
+        'edit_session.html', 
+        session=session_to_edit, 
+        user=user
+    )
+
+
 @app.route('/work', methods=['GET', 'POST'])
 def work():
     if 'user_id' not in session:
@@ -124,7 +151,7 @@ def users():
     users = User.query.all()
     return render_template('users.html', users=users)
 
-@app.route('/edit_session', methods=['GET', 'POST'])
+@app.route('/add_session', methods=['GET', 'POST'])
 @admin_required
 def edit_session():
     if request.method == 'POST':
@@ -146,7 +173,8 @@ def edit_session():
 
         return redirect(url_for('users'))
 
-    return render_template('edit_session.html')
+    return render_template('add_session.html')
+
 
 @app.route('/user/<int:user_id>/sessions', methods=['GET', 'POST'])
 def user_sessions(user_id):
@@ -170,6 +198,7 @@ def user_sessions(user_id):
                 ]
             except ValueError:
                 flash('Невірний формат дати. Використовуйте формат YYYY-MM-DD.', 'error')
+
 
     return render_template('user_sessions.html', user=user, sessions=filtered_sessions, filter_date=filter_date)
 

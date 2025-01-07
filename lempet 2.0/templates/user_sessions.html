@@ -2,6 +2,7 @@
 
 {% block title %}Сесії користувача {{ user.username }}{% endblock %}
 
+
 {% block content %}
 <div class="container mt-5">
     <h1>Сесії користувача {{ user.username }}</h1>
@@ -17,7 +18,7 @@
                 <button type="submit" class="btn btn-primary">Фільтрувати</button>
             </div>
             <div class="col-auto">
-                <a href="/edit_session" class="btn btn-primary">Редагувати</a>
+                <a href="/add_session" class="btn btn-primary">Додати</a>
             </div>
         </div>
     </form>
@@ -26,10 +27,17 @@
     {% if sessions %}
         <ul class="list-group">
             {% for session in sessions %}
-            <li class="list-group-item">
-                Початок: {{ session.start_time.strftime('%Y-%m-%d %H:%M:%S') if session.start_time else "Не вказано" }}<br>
-                Кінець: {{ session.end_time.strftime('%Y-%m-%d %H:%M:%S') if session.end_time else "Активна сесія" }}
-            </li>
+<li class="list-group-item d-flex justify-content-between align-items-center">
+    <div>
+        Початок: {{ session.start_time.strftime('%Y-%m-%d %H:%M:%S') if session.start_time else "Не вказано" }}<br>
+        Кінець: {{ session.end_time.strftime('%Y-%m-%d %H:%M:%S') if session.end_time else "Активна сесія" }}
+    </div>
+    <div>
+        <a href="{{ url_for('edit_user_session', user_id=user.id, session_id=session.id) }}" class="btn btn-warning btn-sm">
+            Редагувати
+        </a>
+    </div>
+</li>
             {% endfor %}
         </ul>
     {% else %}
