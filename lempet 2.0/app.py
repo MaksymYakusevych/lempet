@@ -109,7 +109,7 @@ def edit_user_session(user_id, session_id):
     
     return render_template(
         'edit_session.html', 
-        session=session_to_edit, 
+        work_session=session_to_edit,  # Renamed the variable
         user=user
     )
 
@@ -153,27 +153,43 @@ def users():
 
 @app.route('/add_session', methods=['GET', 'POST'])
 @admin_required
-def edit_session():
+def add_or_edit_session():
+    session_id = request.form.get('session_id') if request.method == 'POST' else None
+    session_to_edit = WorkSession.query.get(session_id) if session_id else None
+
     if request.method == 'POST':
-        session_id = request.form.get('session_id')
         new_start_time = request.form.get('start_time')
         new_end_time = request.form.get('end_time')
 
-        session_to_edit = WorkSession.query.get(session_id)
-
-        if session_to_edit:
+        if session_to_edit:  # Editing an existing session
             if new_start_time:
                 session_to_edit.start_time = datetime.strptime(new_start_time, '%Y-%m-%dT%H:%M')
             if new_end_time:
                 session_to_edit.end_time = datetime.strptime(new_end_time, '%Y-%m-%dT%H:%M')
             db.session.commit()
             flash('Сесію успішно відредаговано!', 'success')
-        else:
-            flash('Сесію не знайдено!', 'error')
+        else:  # Adding a new session
+            user_id = request.form.get('user_id')
+            if new_start_time and new_end_time:
+                new_session = WorkSession(
+                    user_id=user_id,
+                    start_time=datetime.strptime(new_start_time, '%Y-%m-%dT%H:%M'),
+                    end_time=datetime.strptime(new_end_time, '%Y-%m-%dT%H:%M')
+                )
+                db.session.add(new_session)
+                db.session.commit()
+                flash('Нова сесія успішно додана!', 'success')
+            else:
+                flash('Не вдалося створити сесію. Перевірте введені дані.', 'error')
 
         return redirect(url_for('users'))
 
-    return render_template('add_session.html')
+    users = User.query.all()
+    return render_template(
+        'add_session.html', 
+        work_session=session_to_edit, 
+        users=users
+    )
 
 
 @app.route('/user/<int:user_id>/sessions', methods=['GET', 'POST'])

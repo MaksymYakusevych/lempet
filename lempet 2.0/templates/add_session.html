@@ -1,20 +1,20 @@
 {% extends "base.html" %}
 
-{% block title %}Редагування сесії{% endblock %}
+{% block title %}{{ 'Редагування сесії' if work_session else 'Додати нову сесію' }}{% endblock %}
 
 {% block content %}
-<h1>{% if session and session.id %}Редагувати сесію{% else %}Додати нову сесію{% endif %}</h1>
+<h1>{{ 'Редагувати сесію' if work_session else 'Додати нову сесію' }}</h1>
 
 <form method="POST">
-    {% if session and session.id %}
-        <input type="hidden" name="session_id" value="{{ session.id }}">
+    {% if work_session %}
+        <input type="hidden" name="session_id" value="{{ work_session.id }}">
     {% endif %}
     
     <div class="mb-3">
         <label for="user_id" class="form-label">Виберіть користувача:</label>
-        <select id="user_id" name="user_id" class="form-control" {% if session %}disabled{% endif %}>
+        <select id="user_id" name="user_id" class="form-control" {% if work_session %}disabled{% endif %}>
             {% for user in users %}
-                <option value="{{ user.id }}" {% if session and session.user_id == user.id %}selected{% endif %}>
+                <option value="{{ user.id }}" {% if work_session and work_session.user_id == user.id %}selected{% endif %}>
                     {{ user.username }}
                 </option>
             {% endfor %}
@@ -24,14 +24,14 @@
     <div class="mb-3">
         <label for="start_time" class="form-label">Початок:</label>
         <input type="datetime-local" id="start_time" name="start_time" class="form-control"
-               value="{{ session.start_time.strftime('%Y-%m-%dT%H:%M') if session and session.start_time }}">
+               value="{{ work_session.start_time.strftime('%Y-%m-%dT%H:%M') if work_session and work_session.start_time }}">
     </div>
     <div class="mb-3">
         <label for="end_time" class="form-label">Кінець:</label>
         <input type="datetime-local" id="end_time" name="end_time" class="form-control"
-               value="{{ session.end_time.strftime('%Y-%m-%dT%H:%M') if session and session.end_time }}">
+               value="{{ work_session.end_time.strftime('%Y-%m-%dT%H:%M') if work_session and work_session.end_time }}">
     </div>
     <button type="submit" class="btn btn-primary">Зберегти</button>
-    <a href="{{ url_for('user_sessions', user_id=session['user_id']) }}" class="btn btn-secondary">Скасувати</a>
+    <a href="{{ url_for('users') }}" class="btn btn-secondary">Скасувати</a>
 </form>
 {% endblock %}
