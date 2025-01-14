@@ -13,6 +13,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
+
 # Модель користувача
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -87,6 +88,32 @@ def login():
 
     return render_template('login.html')
 
+@app.route('/user/<int:user_id>/sessions/edit/<int:session_id>', methods=['GET', 'POST'])
+@admin_required
+def edit_user_session(user_id, session_id):
+    user = User.query.get_or_404(user_id)
+    session_to_edit = WorkSession.query.get_or_404(session_id)
+    
+    if request.method == 'POST':
+        new_start_time = request.form.get('start_time')
+        new_end_time = request.form.get('end_time')
+
+        if new_start_time:
+            session_to_edit.start_time = datetime.strptime(new_start_time, '%Y-%m-%dT%H:%M')
+        if new_end_time:
+            session_to_edit.end_time = datetime.strptime(new_end_time, '%Y-%m-%dT%H:%M')
+
+        db.session.commit()
+        flash('Сесію успішно відредаговано!', 'success')
+        return redirect(url_for('user_sessions', user_id=user_id))
+    
+    return render_template(
+        'edit_session.html', 
+        work_session=session_to_edit,  # Renamed the variable
+        user=user
+    )
+
+
 @app.route('/work', methods=['GET', 'POST'])
 def work():
     if 'user_id' not in session:
@@ -124,29 +151,45 @@ def users():
     users = User.query.all()
     return render_template('users.html', users=users)
 
-@app.route('/edit_session', methods=['GET', 'POST'])
+@app.route('/add_session', methods=['GET', 'POST'])
 @admin_required
-def edit_session():
+def add_or_edit_session():
+    session_id = request.form.get('session_id') if request.method == 'POST' else None
+    session_to_edit = WorkSession.query.get(session_id) if session_id else None
+
     if request.method == 'POST':
-        session_id = request.form.get('session_id')
         new_start_time = request.form.get('start_time')
         new_end_time = request.form.get('end_time')
 
-        session_to_edit = WorkSession.query.get(session_id)
-
-        if session_to_edit:
+        if session_to_edit:  # Editing an existing session
             if new_start_time:
                 session_to_edit.start_time = datetime.strptime(new_start_time, '%Y-%m-%dT%H:%M')
             if new_end_time:
                 session_to_edit.end_time = datetime.strptime(new_end_time, '%Y-%m-%dT%H:%M')
             db.session.commit()
             flash('Сесію успішно відредаговано!', 'success')
-        else:
-            flash('Сесію не знайдено!', 'error')
+        else:  # Adding a new session
+            user_id = request.form.get('user_id')
+            if new_start_time and new_end_time:
+                new_session = WorkSession(
+                    user_id=user_id,
+                    start_time=datetime.strptime(new_start_time, '%Y-%m-%dT%H:%M'),
+                    end_time=datetime.strptime(new_end_time, '%Y-%m-%dT%H:%M')
+                )
+                db.session.add(new_session)
+                db.session.commit()
+                flash('Нова сесія успішно додана!', 'success')
+            else:
+                flash('Не вдалося створити сесію. Перевірте введені дані.', 'error')
 
         return redirect(url_for('users'))
 
-    return render_template('edit_session.html')
+    users = User.query.all()
+    return render_template(
+        'add_session.html', 
+        work_session=session_to_edit, 
+        users=users
+    )
 
 
 @app.route('/user/<int:user_id>/sessions', methods=['GET', 'POST'])
@@ -172,6 +215,7 @@ def user_sessions(user_id):
             except ValueError:
                 flash('Невірний формат дати. Використовуйте формат YYYY-MM-DD.', 'error')
 
+
     return render_template('user_sessions.html', user=user, sessions=filtered_sessions, filter_date=filter_date)
 
 @app.route('/logout')
@@ -180,7 +224,20 @@ def logout():
     flash('Ви успішно вийшли із системи.', 'success')
     return redirect(url_for('home'))
 
-
+@app.route('/user/<int:user_id>/sessions/delete/<int:session_id>', methods=['POST'])
+@admin_required
+def delete_session(user_id, session_id):
+    session_to_delete = WorkSession.query.get_or_404(session_id)
+    
+    # Перевірка на відповідність користувача
+    if session_to_delete.user_id != user_id:
+        flash('Спроба видалення недійсна.', 'error')
+        return redirect(url_for('user_sessions', user_id=user_id))
+    
+    db.session.delete(session_to_delete)
+    db.session.commit()
+    flash('Сесію успішно видалено!', 'success')
+    return redirect(url_for('user_sessions', user_id=user_id))
 
 
 @app.route('/add_admin_once')
